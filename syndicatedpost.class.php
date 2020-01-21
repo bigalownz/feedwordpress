@@ -705,7 +705,6 @@ class SyndicatedPost {
 		$author = array ();
 
 		$aa = $this->entry->get_authors();
-		if (count($aa) > 0) :
 		if (is_countable($aa) && count($aa) > 0) :
 			$a = reset($aa);
 
