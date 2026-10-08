@@ -1219,72 +1219,67 @@ class FeedWordPress {
 		return $delta;
 	}
 
-	public function feedwordpress_cleanup () {
+public function feedwordpress_cleanup () {
+		if (get_option('feedwordpress_process_zaps', null)) {
 			$q = new WP_Query(array(
-			'post_type'           => 'post',
-			'post_status'         => 'fwpzapped',
-			'posts_per_page'      => -1,
-			'ignore_sticky_posts' => true,
-			'fields'              => 'ids',
-			'meta_query'          => array(
-				array(
-					'key'     => '_feedwordpress_zapped_blank_me',
-					'value'   => '1',
-					'compare' => '='
+				'post_type'           => 'post',
+				'post_status'         => 'fwpzapped',
+				'posts_per_page'      => -1,
+				'ignore_sticky_posts' => true,
+				'fields'              => 'ids',
+				'meta_query'          => array(
+					array(
+						'key'     => '_feedwordpress_zapped_blank_me',
+						'value'   => '1',
+						'compare' => '='
+					)
 				)
-			)
 			));
 
-			if ($q->have_posts()) :
-				foreach ($q->posts as $p) :
-
-					$post_id = $p->ID;
+			if ($q->have_posts()) {
+				foreach ($q->posts as $post_id) {
 					$revisions = wp_get_post_revisions($post_id, array("check_enabled" => false));
 
 					# Now nuke the content of the post & its revisions
 					set_post_field('post_content', '', $post_id);
 					set_post_field('post_excerpt', '', $post_id);
 
-					foreach ($revisions as $rev) :
-						set_post_field('post_content', '', $rev->ID);
-						set_post_field('post_excerpt', '', $rev->ID);
-					endforeach;
+					if (is_array($revisions) || is_object($revisions)) {
+						foreach ($revisions as $rev) {
+							set_post_field('post_content', '', $rev->ID);
+							set_post_field('post_excerpt', '', $rev->ID);
+						}
+					}
 
 					# Un-tag it for blanking.
-					delete_post_meta($p->ID, '_feedwordpress_zapped_blank_me');
-
-					# Don't remove old_status indicator. A later
-					# update from the feed may cause us to once
-					# again have some content so we can un-zap.
-
-				endforeach;
-			endif;
+					delete_post_meta($post_id, '_feedwordpress_zapped_blank_me');
+				}
+			}
 
 			$q = new WP_Query(array(
-			'post_type'           => 'post',
-			'post_status'         => 'fwpzapped',
-			'posts_per_page'      => -1,
-			'ignore_sticky_posts' => true,
-			'fields'              => 'ids',
-			'meta_query'          => array(
-				array(
-					'key'     => '_feedwordpress_zapped_blank_me',
-					'value'   => '2',
-					'compare' => '='
+				'post_type'           => 'post',
+				'post_status'         => 'fwpzapped',
+				'posts_per_page'      => -1,
+				'ignore_sticky_posts' => true,
+				'fields'              => 'ids',
+				'meta_query'          => array(
+					array(
+						'key'     => '_feedwordpress_zapped_blank_me',
+						'value'   => '2',
+						'compare' => '='
+					)
 				)
-			)
 			));
 
-			if ($q->have_posts()) :
-				foreach ($q->posts as $p) :
-					update_post_meta($p->ID, '_feedwordpress_zapped_blank_me', 1);
-				endforeach;
-			endif;
+			if ($q->have_posts()) {
+				foreach ($q->posts as $post_id) {
+					update_post_meta($post_id, '_feedwordpress_zapped_blank_me', 1);
+				}
+			}
 
 			update_option('feedwordpress_process_zaps', 0);
-		endif;
+		}
 	} /* FeedWordPress::feedwordpress_cleanup () */
-
 	public function init () {
 
 		// If this is a FeedWordPress admin page, queue up scripts for AJAX
