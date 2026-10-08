@@ -333,7 +333,7 @@ function syndication_permalink($permalink = '', $post = null, $leavename = false
 		$postId = $post->ID;
 	elseif (is_string($permalink) and strlen($permalink) > 0) :
 		// Map this permalink to a post ID so we can get the correct
-		// permalink even outside of the Post Loop. Props Björn.
+		// permalink even outside of the Post Loop. Props BjÃ¶rn.
 		$postId = url_to_postid($permalink);
 	else :
 		// If the permalink string is empty but Post Loop context
@@ -827,7 +827,7 @@ class FeedWordPress {
 
 	@param string|null $uri Either the URI of the feed to poll, the URI of the (human-readable) website whose feed you want to poll, or null.
 	@param mixed|null $crash_ts Unknown purpose.
-	@return array|null Associative array, with 'new' => # of new posts added during update, and 'updated' => # of old posts that were updated. If both are zero, there was no change since çast update.
+	@return array|null Associative array, with 'new' => # of new posts added during update, and 'updated' => # of old posts that were updated. If both are zero, there was no change since Ã§ast update.
 	*/
 	public function update( $uri = null, $crash_ts = null ) {
 		if ( FeedWordPress::needs_upgrade() ) : // Will make duplicate posts if we don't hold off
@@ -1220,13 +1220,19 @@ class FeedWordPress {
 	}
 
 	public function feedwordpress_cleanup () {
-		if (get_option('feedwordpress_process_zaps', null)) :
 			$q = new WP_Query(array(
-			'fields' => '_synfrom',
-			'post_status' => 'fwpzapped',
+			'post_type'           => 'post',
+			'post_status'         => 'fwpzapped',
+			'posts_per_page'      => -1,
 			'ignore_sticky_posts' => true,
-			'meta_key' => '_feedwordpress_zapped_blank_me',
-			'meta_value' => 1,
+			'fields'              => 'ids',
+			'meta_query'          => array(
+				array(
+					'key'     => '_feedwordpress_zapped_blank_me',
+					'value'   => '1',
+					'compare' => '='
+				)
+			)
 			));
 
 			if ($q->have_posts()) :
@@ -1255,11 +1261,18 @@ class FeedWordPress {
 			endif;
 
 			$q = new WP_Query(array(
-			'fields' => '_synfrom',
-			'post_status' => 'fwpzapped',
+			'post_type'           => 'post',
+			'post_status'         => 'fwpzapped',
+			'posts_per_page'      => -1,
 			'ignore_sticky_posts' => true,
-			'meta_key' => '_feedwordpress_zapped_blank_me',
-			'meta_value' => 2,
+			'fields'              => 'ids',
+			'meta_query'          => array(
+				array(
+					'key'     => '_feedwordpress_zapped_blank_me',
+					'value'   => '2',
+					'compare' => '='
+				)
+			)
 			));
 
 			if ($q->have_posts()) :
@@ -1592,7 +1605,7 @@ class FeedWordPress {
 				/** @var array Merge the two arrays together so our widget is at the beginning. */
 				$sorted_dashboard = array_merge( $backup, $normal_dashboard );
 
-				// Save the sorted array back into the original €es
+				// Save the sorted array back into the original â‚¬es
 				$wp_meta_boxes['dashboard'][ $column ][ $priority ] = $sorted_dashboard;
 			endif;
 		endif;
